@@ -1,6 +1,8 @@
 const tape = require('tape')
 const jsonist = require('jsonist')
 
+const db = require('./db')
+
 const port = (process.env.PORT = process.env.PORT || require('get-port-sync')())
 const endpoint = `http://localhost:${port}`
 
