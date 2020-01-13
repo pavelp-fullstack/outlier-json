@@ -1,6 +1,7 @@
 const tape = require('tape')
 const jsonist = require('jsonist')
 
+const messages = require('./messages')
 const db = require('./db')
 
 const port = (process.env.PORT = process.env.PORT || require('get-port-sync')())
@@ -30,42 +31,61 @@ tape('PUT property', t => {
   })
 })
 
-// tape('DELETE existing property', t => {
-//   db.clean(student)
-//   jsonist.get(testurl, (err, body) => {
-//     if (err) t.error(err)
-//     t.ok(body.success, 'should return success on deleting existing property')
-//     t.end()
-//   })
-// })
+tape('DELETE existing property', t => {
+  db.clean(student)
+  jsonist.put(testurl, value, (err, body) => {
+    if (err) t.error(err)
 
-// tape('DELETE missing property', t => {
-//   db.clean(student)
-//   jsonist.get(testurl, (err, body) => {
-//     if (err) t.error(err)
-//     t.notEquals(body.error, undefined, 'should return error on deleting missing property')
-//     t.end()
-//   })
-// })
+    jsonist.delete(testurl, (err, body) => {
+      if (err) t.error(err)
+      t.ok(body.success, 'should return success')
+      t.end()
+    })
+  })
+})
 
-// tape('GET existing property', t => {
-//   db.clean(student)
-//   jsonist.get(testurl, (err, body) => {
-//     if (err) t.error(err)
-//     t.equals(JSON.stringify(body), JSON.stringify(value), 'should return valid property')
-//     t.end()
-//   })
-// })
+tape('DELETE missing property', t => {
+  db.clean(student)
+  jsonist.get(testurl, (err, body) => {
+    if (err) t.error(err)
+    t.equals(
+      JSON.stringify(body),
+      JSON.stringify(messages.notFound),
+      'should return \'Not Found\' error'
+    )
+    t.end()
+  })
+})
 
-// tape('GET missing property', t => {
-//   db.clean(student)
-//   jsonist.get(testurl, (err, body) => {
-//     if (err) t.error(err)
-//     t.notEquals(body.error, undefined, 'should return error for missing property')
-//     t.equals(body.error, 'Not Found', 'should return \'Not Found\' error')
-//     t.end()
-//   })
-// })
+tape('GET existing property', t => {
+  db.clean(student)
+  jsonist.put(testurl, value, (err, body) => {
+    if (err) t.error(err)
+
+    jsonist.get(testurl, (err, body) => {
+      if (err) t.error(err)
+      t.equals(
+        JSON.stringify(body),
+        JSON.stringify(value),
+        'should return the valid prop'
+      )
+      t.end()
+    })
+  })
+})
+
+tape('GET missing property', t => {
+  db.clean(student)
+  jsonist.get(testurl, (err, body) => {
+    if (err) t.error(err)
+    t.equals(
+      JSON.stringify(body),
+      JSON.stringify(messages.notFound),
+      'should return \'Not Found\' error'
+    )
+    t.end()
+  })
+})
 
 tape('cleanup', function (t) {
   db.clean(student)
