@@ -1,4 +1,5 @@
 const { STATUS_CODES } = require('http')
+const messages = require('./messages')
 
 module.exports = {
   notFound,
@@ -15,5 +16,5 @@ function handleError (err, req, res, next) {
 }
 
 function notFound (req, res) {
-  res.status(404).json({ error: 'Not Found' })
+  res.status(404).json(messages.notFound)
 }
