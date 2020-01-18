@@ -8,10 +8,16 @@ module.exports = {
   clean,
   get,
   put,
-  del
+  del,
+  fileExists
 }
 
 if (!fs.existsSync(dataPath)) fs.mkdirSync(dataPath, { recursive: true })
+
+function fileExists (student) {
+  const fp = dataFilePath(student)
+  return fs.existsSync(fp)
+}
 
 function dataFilePath (student) {
   return path.join(dataPath, student + '.json')
@@ -27,7 +33,7 @@ function get (student, prop) {
   if (!fs.existsSync(fp)) return null
 
   const data = JSON.parse(fs.readFileSync(fp, { encoding: 'utf8' }))
-  return _.get(data, prop)
+  return prop.length > 0 ? _.get(data, prop) : data
 }
 
 function put (student, prop, value) {
@@ -45,6 +51,9 @@ function del (student, prop) {
   const value = _.get(data, prop)
   if (value === null || value === undefined) return false
   _.unset(data, prop)
-  fs.writeFileSync(fp, JSON.stringify(data), { encoding: 'utf8' })
+
+  const result = JSON.stringify(data)
+  if (result === '{}') clean(student)
+  else fs.writeFileSync(fp, JSON.stringify(data), { encoding: 'utf8' })
   return true
 }

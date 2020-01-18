@@ -44,16 +44,49 @@ tape('DELETE existing property', t => {
   })
 })
 
+tape('Delete empty data file', t => {
+  db.clean(student)
+  jsonist.put(testurl, value, (err, body) => {
+    if (err) t.error(err)
+
+    const url = endpoint + '/' + student + '/courses'
+
+    jsonist.delete(url, (err, body) => {
+      if (err) t.error(err)
+      // t.ok(body.success, 'should return success')
+      const fileExists = db.fileExists(student)
+      t.equals(fileExists, false)
+      t.end()
+    })
+  })
+})
+
 tape('DELETE missing property', t => {
   db.clean(student)
-  jsonist.get(testurl, (err, body) => {
+  jsonist.get(testurl, (err, body, resp) => {
     if (err) t.error(err)
+    t.equals(resp.statusCode, 404)
     t.equals(
       JSON.stringify(body),
       JSON.stringify(messages.notFound),
       'should return \'Not Found\' error'
     )
     t.end()
+  })
+})
+
+tape('GET whole file if <student>/ is passed', t => {
+  db.clean(student)
+  jsonist.put(testurl, value, (err, body) => {
+    if (err) t.error(err)
+
+    const studentRoot = endpoint + '/' + student
+
+    jsonist.get(studentRoot, (err, body) => {
+      if (err) t.error(err)
+      t.ok(body.courses.calculus.quizzes.ye0ab61.score, 'should return complete prop hierarchy')
+      t.end()
+    })
   })
 })
 
@@ -76,8 +109,9 @@ tape('GET existing property', t => {
 
 tape('GET missing property', t => {
   db.clean(student)
-  jsonist.get(testurl, (err, body) => {
+  jsonist.get(testurl, (err, body, resp) => {
     if (err) t.error(err)
+    t.equals(resp.statusCode, 404)
     t.equals(
       JSON.stringify(body),
       JSON.stringify(messages.notFound),

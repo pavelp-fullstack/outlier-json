@@ -8,12 +8,17 @@ const PORT = process.env.PORT || 1337
 
 const app = express()
 
+app.use((req, res, next) => {
+  console.dir(req)
+  next()
+})
+
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 app.get('/health', api.getHealth)
 app.put('/:student/*', api.putProp)
-app.get('/:student/*', api.getProp)
+app.get(['/:student', '/:student/*'], api.getProp)
 app.delete('/:student/*', api.deleteProp)
 
 app.use(middleware.handleError)
